@@ -1,0 +1,65 @@
+<svg viewBox="0 0 900 640" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica,Arial,sans-serif" font-size="13">
+  <rect width="900" height="640" fill="#ffffff"/>
+  <text x="450" y="28" text-anchor="middle" font-size="18" font-weight="bold">SaaS Platform on AWS - Architecture</text>
+
+  <rect x="20" y="45" width="860" height="570" rx="10" fill="#f7f9fc" stroke="#232f3e" stroke-width="2"/>
+  <text x="32" y="65" font-weight="bold" fill="#232f3e">AWS Region (us-east-1) - VPC 10.0.0.0/16</text>
+
+  <!-- Users / IGW -->
+  <rect x="380" y="75" width="140" height="34" rx="6" fill="#232f3e"/><text x="450" y="97" text-anchor="middle" fill="#fff">Users (Internet)</text>
+  <line x1="450" y1="109" x2="450" y2="132" stroke="#232f3e" stroke-width="2" marker-end="url(#a)"/>
+  <rect x="380" y="132" width="140" height="30" rx="6" fill="#8c4fff"/><text x="450" y="152" text-anchor="middle" fill="#fff">Internet Gateway</text>
+
+  <!-- AZ boxes -->
+  <rect x="40" y="180" width="410" height="420" rx="8" fill="none" stroke="#147eba" stroke-dasharray="6 4" stroke-width="1.5"/>
+  <text x="50" y="198" fill="#147eba" font-weight="bold">Availability Zone A</text>
+  <rect x="460" y="180" width="410" height="420" rx="8" fill="none" stroke="#147eba" stroke-dasharray="6 4" stroke-width="1.5"/>
+  <text x="470" y="198" fill="#147eba" font-weight="bold">Availability Zone B</text>
+
+  <!-- Public subnets -->
+  <rect x="55" y="210" width="380" height="120" rx="6" fill="#e9f7ec" stroke="#3f8624"/>
+  <text x="65" y="228" fill="#3f8624" font-weight="bold">Public subnet 10.0.0.0/24</text>
+  <rect x="475" y="210" width="380" height="120" rx="6" fill="#e9f7ec" stroke="#3f8624"/>
+  <text x="485" y="228" fill="#3f8624" font-weight="bold">Public subnet 10.0.1.0/24</text>
+
+  <!-- ALB spanning -->
+  <rect x="230" y="245" width="440" height="34" rx="6" fill="#8c4fff"/>
+  <text x="450" y="267" text-anchor="middle" fill="#fff">Application Load Balancer  (443 HTTPS, 80 -> 301 redirect)</text>
+  <rect x="85" y="288" width="150" height="30" rx="6" fill="#8c4fff"/><text x="160" y="308" text-anchor="middle" fill="#fff">NAT Gateway</text>
+  <text x="640" y="308" fill="#555" font-size="11">(2nd NAT optional: single_nat_gateway=false)</text>
+
+  <!-- Private subnets -->
+  <rect x="55" y="350" width="380" height="140" rx="6" fill="#e8f1fb" stroke="#147eba"/>
+  <text x="65" y="368" fill="#147eba" font-weight="bold">Private subnet 10.0.10.0/24</text>
+  <rect x="475" y="350" width="380" height="140" rx="6" fill="#e8f1fb" stroke="#147eba"/>
+  <text x="485" y="368" fill="#147eba" font-weight="bold">Private subnet 10.0.11.0/24</text>
+
+  <rect x="110" y="385" width="270" height="85" rx="6" fill="#ed7100"/>
+  <text x="245" y="410" text-anchor="middle" fill="#fff" font-weight="bold">EC2 t4g (Graviton) - NGINX</text>
+  <text x="245" y="430" text-anchor="middle" fill="#fff" font-size="12">No public IP | IMDSv2 | encrypted EBS</text>
+  <text x="245" y="448" text-anchor="middle" fill="#fff" font-size="12">IAM role (SSM + CW agent)</text>
+  <rect x="530" y="385" width="270" height="85" rx="6" fill="#ed7100"/>
+  <text x="665" y="410" text-anchor="middle" fill="#fff" font-weight="bold">EC2 t4g (Graviton) - NGINX</text>
+  <text x="665" y="430" text-anchor="middle" fill="#fff" font-size="12">No public IP | IMDSv2 | encrypted EBS</text>
+  <text x="665" y="448" text-anchor="middle" fill="#fff" font-size="12">IAM role (SSM + CW agent)</text>
+
+  <!-- arrows ALB -> EC2 -->
+  <line x1="300" y1="279" x2="260" y2="385" stroke="#232f3e" stroke-width="2" marker-end="url(#a)"/>
+  <line x1="600" y1="279" x2="640" y2="385" stroke="#232f3e" stroke-width="2" marker-end="url(#a)"/>
+  <!-- EC2 -> NAT -->
+  <line x1="150" y1="385" x2="150" y2="318" stroke="#8c4fff" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#b)"/>
+
+  <!-- ASG banner -->
+  <rect x="55" y="500" width="800" height="30" rx="6" fill="#fff3e0" stroke="#ed7100"/>
+  <text x="455" y="520" text-anchor="middle" fill="#7a3b00">Auto Scaling Group: min 2 / desired 2 / max 6 | target tracking CPU 50% | ELB health checks (/health)</text>
+
+  <!-- Observability -->
+  <rect x="55" y="540" width="800" height="48" rx="6" fill="#fde7ef" stroke="#e7157b"/>
+  <text x="455" y="560" text-anchor="middle" fill="#8a0a45" font-weight="bold">Observability &amp; Governance</text>
+  <text x="455" y="578" text-anchor="middle" fill="#8a0a45" font-size="12">CloudWatch Logs + metrics | Alarms: CPU, UnHealthyHost, 5xx -> SNS email | ALB logs -> S3 (BPA) | VPC flow logs | AWS Budget</text>
+
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#232f3e"/></marker>
+    <marker id="b" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#8c4fff"/></marker>
+  </defs>
+</svg>
