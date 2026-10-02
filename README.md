@@ -120,3 +120,4 @@ EC2 and EBS figures come from published ap-south-1 prices; the NAT and ALB lines
 - Demo self-signed certificate until a real `certificate_arn` is supplied.
 - Not validated in this authoring environment (no Terraform/AWS access here): run `terraform validate` and `plan` before relying on it.
 - Sample app is static NGINX; no database tier included.
+
