@@ -29,7 +29,7 @@ Prereqs: Terraform >= 1.10, AWS CLI configured (SSO/role, not static keys), an e
 
 ```bash
 # 1. (once) create the remote-state bucket
-cd bootstrap && terraform init && terraform apply && cd ..
+cd bootstrap && terraform init && terraform apply -var="region=ap-south-1" && cd ..
 
 # 2. configure
 cp terraform.tfvars.example terraform.tfvars      # set alert_email (git-ignored)
@@ -38,7 +38,7 @@ cp terraform.tfvars.example terraform.tfvars      # set alert_email (git-ignored
 terraform init \
   -backend-config="bucket=<state_bucket_from_step_1>" \
   -backend-config="key=saas/prod/terraform.tfstate" \
-  -backend-config="region=us-east-1" \
+  -backend-config="region=<state_bucket_region>" \
   -backend-config="use_lockfile=true"
 terraform plan -out tfplan
 terraform apply tfplan
@@ -57,7 +57,7 @@ PRs run fmt/validate/lint/scan/plan; merging to `main` runs apply after manual a
 |---|---|
 | 2 AZs, ALB + ASG spanning both | Survives an AZ failure; min 2 instances means one per AZ |
 | EC2 in private subnets, ALB only public | Smallest internet-facing surface |
-| Graviton `t4g.micro`, AL2023 arm64 | ~20% cheaper than x86 equivalents, better price/performance |
+| Graviton `t4g.small`, AL2023 arm64 | ~20% cheaper than x86 equivalents, better price/performance |
 | ASG `health_check_type = ELB` | Instances failing the app health check are replaced automatically |
 | SSM Session Manager, no SSH, no key pairs | No inbound admin port, no keys to leak, audited sessions |
 | Self-signed cert by default | Lets the stack deploy HTTPS with no domain. Pass `certificate_arn` for a real ACM cert |
@@ -65,19 +65,19 @@ PRs run fmt/validate/lint/scan/plan; merging to `main` runs apply after manual a
 | Modular Terraform + remote S3 state with locking | Reusable, reviewable, safe for team/CI use |
 | OIDC for CI | No long-lived credentials anywhere |
 
-## c) Cost estimate (us-east-1, on-demand, approximate monthly)
-| Item | Est. USD |
-|---|---|
-| 2 x t4g.micro EC2 (730h) | 12.3 |
-| 2 x 8 GB gp3 EBS | 1.3 |
-| 1 NAT Gateway (+ ~10 GB data) | 33.3 |
-| ALB (hours + minimal LCU) | 22.0 |
-| Public IPv4 addresses (ALB x2, NAT EIP) | 11.0 |
-| CloudWatch (logs, alarms, custom metrics) | 3.0 |
-| S3 logs, flow logs, SNS, Budgets | 1.0 |
-| **Total** | **about $84 / month** |
+## c) Cost estimate (ap-south-1 Mumbai, on-demand, approximate monthly)
+| Item | Est. USD | Basis |
+|---|---|---|
+| 2 x t4g.small EC2 (730h) | 16.4 | $0.0112/h each |
+| 2 x 8 GB gp3 EBS | 1.5 | $0.0912/GB-month |
+| 1 NAT Gateway (+ ~10 GB data) | ~42 | approx. hourly rate, verify in calculator |
+| ALB (hours + minimal LCU) | ~18 | approx., verify in calculator |
+| Public IPv4 addresses (ALB x2, NAT EIP) | ~11 | $0.005/h each |
+| CloudWatch (logs, alarms, custom metrics) | ~3 | |
+| S3 logs, flow logs, SNS, Budgets | ~1 | |
+| **Total** | **about $93 / month** | |
 
-Prices vary by region and change over time; confirm with the AWS Pricing Calculator. Budget default is $100/month with alerts at 80% actual and 100% forecast.
+EC2 and EBS figures come from published ap-south-1 prices; the NAT and ALB lines are estimates. Prices change, so confirm with the AWS Pricing Calculator. Default budget is $100/month with alerts at 80% actual and 100% forecast. The NAT gateway is the largest line item.
 
 **Optimization recommendations**
 - **Graviton** (already used): ~20% lower than comparable x86.
@@ -110,6 +110,11 @@ Prices vary by region and change over time; confirm with the AWS Pricing Calcula
 - CloudWatch Logs: NGINX access/error logs (`/<name>/nginx`), VPC flow logs; ALB access logs in S3.
 - Metrics: EC2/ALB default metrics plus agent memory and disk.
 - Alarms (SNS email): **high CPU**, **unhealthy hosts**, ALB 5xx.
+
+## Deployment notes (what was actually deployed)
+- Region **ap-south-1 (Mumbai)**, instance type **t4g.small**, set in `terraform.tfvars` (defaults in `variables.tf` now match).
+- First attempt with `t4g.micro` hit an `InsufficientInstanceCapacity` error in ap-south-1a. Resolved by switching to `t4g.small` (separate capacity pool). The optional `az_names` variable can also pin the stack to specific AZs.
+- First ASG creation in a new account can fail with a service-linked-role "access denied" error due to IAM propagation delay; re-running `terraform apply` resolves it.
 
 ## Known limitations
 - Demo self-signed certificate until a real `certificate_arn` is supplied.

@@ -3,7 +3,7 @@
   <text x="450" y="28" text-anchor="middle" font-size="18" font-weight="bold">SaaS Platform on AWS - Architecture</text>
 
   <rect x="20" y="45" width="860" height="570" rx="10" fill="#f7f9fc" stroke="#232f3e" stroke-width="2"/>
-  <text x="32" y="65" font-weight="bold" fill="#232f3e">AWS Region (us-east-1) - VPC 10.0.0.0/16</text>
+  <text x="32" y="65" font-weight="bold" fill="#232f3e">AWS Region (ap-south-1, Mumbai) - VPC 10.0.0.0/16</text>
 
   <!-- Users / IGW -->
   <rect x="380" y="75" width="140" height="34" rx="6" fill="#232f3e"/><text x="450" y="97" text-anchor="middle" fill="#fff">Users (Internet)</text>
@@ -35,11 +35,11 @@
   <text x="485" y="368" fill="#147eba" font-weight="bold">Private subnet 10.0.11.0/24</text>
 
   <rect x="110" y="385" width="270" height="85" rx="6" fill="#ed7100"/>
-  <text x="245" y="410" text-anchor="middle" fill="#fff" font-weight="bold">EC2 t4g (Graviton) - NGINX</text>
+  <text x="245" y="410" text-anchor="middle" fill="#fff" font-weight="bold">EC2 t4g.small (Graviton) - NGINX</text>
   <text x="245" y="430" text-anchor="middle" fill="#fff" font-size="12">No public IP | IMDSv2 | encrypted EBS</text>
   <text x="245" y="448" text-anchor="middle" fill="#fff" font-size="12">IAM role (SSM + CW agent)</text>
   <rect x="530" y="385" width="270" height="85" rx="6" fill="#ed7100"/>
-  <text x="665" y="410" text-anchor="middle" fill="#fff" font-weight="bold">EC2 t4g (Graviton) - NGINX</text>
+  <text x="665" y="410" text-anchor="middle" fill="#fff" font-weight="bold">EC2 t4g.small (Graviton) - NGINX</text>
   <text x="665" y="430" text-anchor="middle" fill="#fff" font-size="12">No public IP | IMDSv2 | encrypted EBS</text>
   <text x="665" y="448" text-anchor="middle" fill="#fff" font-size="12">IAM role (SSM + CW agent)</text>
 
